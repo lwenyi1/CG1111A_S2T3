@@ -125,7 +125,32 @@ void loop()
   else if(lineFinder.readSensors() == S1_IN_S2_IN)
   {
     stopMotor();
-    detectColour();
+    colour = detectColour() ;
+    if ( colour == green )
+    {
+      turnRight() ;
+    }
+    else if ( colour == purple )
+    {
+      doubleLeftTurn() ;
+    }
+    else if ( colour == orange )
+    {
+      uTurn() ;
+    }
+    else if ( colour == blue )
+    {
+      doubleRightTurn() ;
+    }
+    else if ( colour == red )
+    {
+      leftTurn() ;
+    }
+    else 
+    {
+      celebrate() ;
+      delay( 10000 ) ;
+    }
   }
 // else move forward
   else
