@@ -1,11 +1,12 @@
 #include <MeMCore.h>
 #define LIGHTSENSOR A2
 #define ULTRASONIC 12
+#define LDR A3
 
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
+#define COLOURSENSORCOOLDOWN 50 // timeout in ms for coloursensor
 
-int IRBaseLine;
 MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
 MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
 MeLineFollower lineFinder(PORT_2); // assigning lineFinder to RJ25 port 2
@@ -13,6 +14,7 @@ uint8_t motorSpeed = 255;
 
 int closeToLeft = 0;
 int closeToRight = 0;
+float coloursArray[6][3] = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}};
 
 void celebrate() 
 {// Code for playing celebratory tune
@@ -65,18 +67,40 @@ void shineGreen() {// Code for turning on the green LED only
 }
 void shineBlue() {// Code for turning on the blue LED only
 }
+
+
 int detectColour()
 {
-// Shine Red, read LDR after some delay
-// Shine Green, read LDR after some delay
-// Shine Blue, read LDR after some delay
+// Shine each colour, read LDR after some delay
+  int readColour[3];
+  for(int i = 0; i < 3; i++)
+  {
+    decoder(i+1);
+    delay(COLOURSENSORCOOLDOWN);
+    readcolour[i] = analogRead(LDR);
+  }
 // Run algorithm for colour decoding
+  int smallestError = 2147483647, colour = 0;
+  for(int i = 0; i < 6; i++)
+  {
+    int sumSquareError = 0;
+    for(int j = 0; j < 3; j++)
+    {
+      sumSquareError += (readColour[j] - coloursArray[i][j]) * (readColour[j] - coloursArray[i][j]);
+    }
+    if (sumSquareError < smallestError)
+    {
+      colour = i;
+      smallestError = sumSquareError;
+    }
+  }
+  return colour;
 }
+
 void setup()
 {
 // Configure pinMode for A0, A1, A2, A3
   Serial.begin(9600);
-  IRBaseLine = analogRead(LIGHTSENSOR);
 }
 void loop()
 {
@@ -99,6 +123,9 @@ void loop()
   } 
 
 // Read IR sensing distance (turn off IR, read IR detector, turn on IR, read IR detector, estimate distance)
+  decoder(1);
+  int IRBaseline = analogread(LIGHTSENSOR);
+  decoder(0);
   if(analogRead(LIGHTSENSOR) - IRBaseLine > 100)
   {
     closeToRight++;
@@ -125,26 +152,27 @@ void loop()
   else if(lineFinder.readSensors() == S1_IN_S2_IN)
   {
     stopMotor();
-    colour = detectColour() ;
-    if ( colour == green )
+    int colour = detectColour();
+    int red = 0, green = 1, blue = 2, orange = 3, purple = 4;
+    if (colour == red)
+    {
+      leftTurn() ;
+    }
+    else if (colour == green)
     {
       turnRight() ;
     }
-    else if ( colour == purple )
-    {
-      doubleLeftTurn() ;
-    }
-    else if ( colour == orange )
-    {
-      uTurn() ;
-    }
-    else if ( colour == blue )
+    else if (colour == blue)
     {
       doubleRightTurn() ;
     }
-    else if ( colour == red )
+    else if (colour == orange)
     {
-      leftTurn() ;
+      uTurn() ;
+    }
+    else if (colour == purple)
+    {
+      doubleLeftTurn() ;
     }
     else 
     {
@@ -161,4 +189,3 @@ void loop()
   }
   
 }
-
