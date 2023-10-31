@@ -22,6 +22,22 @@ void getColourReadings(int scansPerColour){
     delay(2000);
   }
 
+  void decoder(int mode) { //0 for IR, 1 for Red, 2 for Green, 3 for Blue
+  if (mode == 0) {
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, LOW);
+  } else if (mode == 1) {
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, HIGH);
+  } else if (mode == 2) {
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, LOW);
+  } else {
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, HIGH);
+  }
+}
+
   Serial.println("All colours scanned.");
   for(int i = 0; i < 6; i++)
   {
