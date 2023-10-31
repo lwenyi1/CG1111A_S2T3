@@ -11,7 +11,7 @@ void getColourReadings(int scansPerColour){
       {
         decoder(k);
         delay(50);
-        coloursArray[i][k] += analogRead(A3);
+        coloursArray[i][k - 1] += analogRead(A3);
       }
     }
     for(int k = 0; k < 3; k++)
