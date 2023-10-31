@@ -7,7 +7,7 @@
 
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
-#define COLOURSENSORCOOLDOWN 50 // timeout in ms for coloursensor
+#define COLOURSENSORCOOLDOWN 500 // timeout in ms for coloursensor
 
 float coloursArray[6][3] = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}};
 char colourStr[6][7] = {"Red", "Green", "Blue", "Orange", "Purple", "White"};
@@ -23,7 +23,7 @@ int detectColour()
     readColour[i] = analogRead(LDR);
   }
 // Run algorithm for colour decoding
-  int smallestError = 2147483647, colour = 0;
+  int smallestError = 2147483647, colour = 2;
   for(int i = 0; i < 6; i++)
   {
     int sumSquareError = 0;
@@ -43,7 +43,7 @@ int detectColour()
 void getColourReadings(int scansPerColour){
   for(int i = 0; i < 6; i++)
   {
-    decoder(0);
+    decoder(3);
     Serial.println("Colour calibrating:");
     Serial.println(colourStr[i]);
     delay(5000);     //delay for five seconds for getting sample ready
@@ -53,7 +53,7 @@ void getColourReadings(int scansPerColour){
       for(int k = 1; k <= 3; k++)
       {
         decoder(k);
-        delay(50);
+        delay(500);
         coloursArray[i][k - 1] += analogRead(LDR);
       }
     }
@@ -101,8 +101,10 @@ void decoder(int mode)
 }
 
 void setup(){
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
   Serial.begin(9600);
-  getColourReadings(10);
+  getColourReadings(5);
 }
 
 void loop(){
@@ -111,3 +113,5 @@ void loop(){
  Serial.println(colourStr[detectColour()]);
  Serial.println("---------");
 }
+
+
