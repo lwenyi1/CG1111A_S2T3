@@ -18,7 +18,22 @@ void getColourReadings(int scansPerColour){
     {
       coloursArray[i][k] /= scansPerColour;
     }
-    Serial.println("Colour scanned.")
+    Serial.println("Colour scanned.");
     delay(2000);
+  }
+
+  Serial.println("All colours scanned.");
+  for(int i = 0; i < 6; i++)
+  {
+    Serial.print(colourStr[i]);
+    Serial.print(": (");
+    for(int k = 0; k < 3; k++)
+    {
+      Serial.print(colourStr[k]);
+      Serial.print(":");
+      Serial.print(coloursArray[i][k]);
+      Serial.print(" ");
+    }
+    Serial.print(")");
   }
 }
