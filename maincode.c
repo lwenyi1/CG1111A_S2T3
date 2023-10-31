@@ -2,6 +2,8 @@
 #define LIGHTSENSOR A2
 #define ULTRASONIC 12
 #define LDR A3
+#define S1 A0
+#define S2 A1
 
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
