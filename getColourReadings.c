@@ -35,5 +35,6 @@ void getColourReadings(int scansPerColour){
       Serial.print(" ");
     }
     Serial.print(")");
+    Serial.println(" ");
   }
 }
