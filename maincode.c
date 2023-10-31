@@ -59,13 +59,22 @@ void nudgeRight()
   leftMotor.run(-motorSpeed);
   delay(50);
 }
-void shineIR() {// Code for turning on the IR emitter only
-}
-void shineRed() {// Code for turning on the red LED only
-}
-void shineGreen() {// Code for turning on the green LED only
-}
-void shineBlue() {// Code for turning on the blue LED only
+
+void decoder(int mode)
+{ //0 for IR, 1 for Red, 2 for Green, 3 for Blue
+  if (mode == 0) {
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, LOW);
+  } else if (mode == 1) {
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, HIGH);
+  } else if (mode == 2) {
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, LOW);
+  } else {
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, HIGH);
+  }
 }
 
 
