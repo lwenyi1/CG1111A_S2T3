@@ -113,5 +113,3 @@ void loop(){
  Serial.println(colourStr[detectColour()]);
  Serial.println("---------");
 }
-
-
