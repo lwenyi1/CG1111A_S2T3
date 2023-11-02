@@ -1,7 +1,7 @@
 #include <MeMCore.h>
-#define LIGHTSENSOR A2
+#define LIGHTSENSOR A3
 #define ULTRASONIC 12
-#define LDR A3
+#define LDR A2
 #define S1 A0
 #define S2 A1
 
@@ -15,22 +15,39 @@ char colourStr[6][7] = {"Red", "Green", "Blue", "Orange", "Purple", "White"};
 int detectColour()
 {
 // Shine each colour, read LDR after some delay
-  int readColour[3];
+  float readColour[3];
   for(int i = 0; i < 3; i++)
   {
     decoder(i+1);
     delay(COLOURSENSORCOOLDOWN);
     readColour[i] = analogRead(LDR);
   }
+  //DEBUG
+  Serial.print("(");
+  for(int k = 0; k < 3; k++)
+    {
+      Serial.print(colourStr[k]);
+      Serial.print(":");
+      Serial.print(readColour[k]);
+      Serial.print(" ");
+    }
+  Serial.print(")");
+  Serial.println(" ");
+  //DEBUG
 // Run algorithm for colour decoding
-  int smallestError = 2147483647, colour = 2;
+  float smallestError = 1470000, colour = 2;
   for(int i = 0; i < 6; i++)
   {
-    int sumSquareError = 0;
+    float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
       sumSquareError += (readColour[j] - coloursArray[i][j]) * (readColour[j] - coloursArray[i][j]);
     }
+    //DEBUG
+    Serial.print(colourStr[i]);
+    Serial.print(" error: ");
+    Serial.println(sumSquareError);
+    //DEBUG
     if (sumSquareError < smallestError)
     {
       colour = i;
@@ -43,18 +60,18 @@ int detectColour()
 void getColourReadings(int scansPerColour){
   for(int i = 0; i < 6; i++)
   {
-    decoder(3);
+    decoder(0);
     Serial.println("Colour calibrating:");
     Serial.println(colourStr[i]);
     delay(5000);     //delay for five seconds for getting sample ready
     Serial.println("Scanning...");
     for(int j = 0; j < scansPerColour; j++)
     {
-      for(int k = 1; k <= 3; k++)
+      for(int k = 0; k < 3; k++)
       {
-        decoder(k);
-        delay(500);
-        coloursArray[i][k - 1] += analogRead(LDR);
+        decoder(k + 1);
+        delay(COLOURSENSORCOOLDOWN);
+        coloursArray[i][k] += analogRead(LDR);
       }
     }
     for(int k = 0; k < 3; k++)
@@ -88,7 +105,8 @@ void decoder(int mode)
   if (mode == 0) {
     digitalWrite(S1, LOW);
     digitalWrite(S2, LOW);
-  } else if (mode == 1) {
+  }
+  else if (mode == 1) {
     digitalWrite(S1, HIGH);
     digitalWrite(S2, HIGH);
   } else if (mode == 2) {
@@ -108,8 +126,11 @@ void setup(){
 }
 
 void loop(){
- delay(1000);
+ delay(3000);
+ int ans = detectColour();
  Serial.println("colour detected:");
- Serial.println(colourStr[detectColour()]);
+ Serial.println(colourStr[ans]);
  Serial.println("---------");
 }
+
+
