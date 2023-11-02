@@ -1,10 +1,11 @@
+//Celebration music (Never Gonna Give You Up intro)
 #include <MeMCore.h>
 MeBuzzer buzzer; // create the buzzer object
 
 int notes[] =
 {554, 622, 622, 698, 831, 740, 698, 622, 554, 622, 0, 415, 415};
 
-int rhythmn[] =
+int rhythm[] =
 {6, 10, 6, 6, 1, 1, 1, 1, 6, 10, 4, 2, 10};
 
 void celebrate() {
