@@ -9,7 +9,7 @@
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
 #define COLOURSENSORCOOLDOWN 500
 #define IRSENSORCOOLDOWN 10
-#define NINETYDEG 230
+#define NINETYDEG 210
 
 MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
 MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
@@ -132,8 +132,7 @@ int detectColour()
     float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
-      float error = readColour[j] - coloursArray[i][j];
-      sumSquareError += error * error;
+      sumSquareError += (readColour[j] - coloursArray[i][j]) * (readColour[j] - coloursArray[i][j]);
     }
     if (sumSquareError < smallestError)
     {
