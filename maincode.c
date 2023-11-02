@@ -8,6 +8,7 @@
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
 #define COLOURSENSORCOOLDOWN 50 // timeout in ms for coloursensor
+#define NINETY 230 // time taken to turn 90 deg
 
 MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
 MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
@@ -26,28 +27,49 @@ void stopMotor()
   leftMotor.stop(); // Stop left motor
   rightMotor.stop(); // Stop right motor
 }
-void moveForward() 
+void go_straight() 
 {
-  // Code for moving forward for some short interval
+  leftMotor.run(255);
+  rightMotor.run(-255);
 }
-void turnRight() 
-{
-  // Code for turning right 90 deg
+
+void left_turn() {
+  leftMotor.run(255);
+  rightMotor.run(255);
+  delay(NINETY);
+  go_straight() ;
 }
-void turnLeft() 
-{// Code for turning left 90 deg
+
+void right_turn() {
+  rightMotor.run(-255);
+  leftMotor.run(-255);
+  delay(NINETY+10);
+  go_straight() ;
 }
-void uTurn() 
-{
-  // Code for u-turn
+
+void u_turn() {
+  leftMotor.run(-255);
+  rightMotor.run(-255);
+  delay(3.7 * NINETY);
+  go_straight() ;
 }
-void doubleLeftTurn() 
-{// Code for double left turn
+
+void consec_right() {
+  right_turn();
+  go_straight() ;
+  delay(1000); //adjust time needed to go straight
+  right_turn();
+  go_straight() ;
 }
-void doubleRightTurn() 
-{
-  // Code for double right turn
+
+void consec_left() {
+  left_turn();
+  go_straight();
+  delay(1000);
+  left_turn();
+  go_straight() ;
 }
+
 void nudgeLeft() 
 {
   // Code for nudging slightly to the left for some short interval
