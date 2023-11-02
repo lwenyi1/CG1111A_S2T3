@@ -1,13 +1,15 @@
 #include <MeMCore.h>
-#define LIGHTSENSOR A2
+#define LIGHTSENSOR A3
 #define ULTRASONIC 12
-#define LDR A3
+#define LDR A2
 #define S1 A0
 #define S2 A1
 
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
-#define COLOURSENSORCOOLDOWN 50 // timeout in ms for coloursensor
+#define COLOURSENSORCOOLDOWN 50
+#define IRSENSORCOOLDOWN 10
+#define NINETYDEG 230
 
 MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
 MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
@@ -28,76 +30,103 @@ void stopMotor()
 }
 void moveForward() 
 {
-  // Code for moving forward for some short interval
+  leftMotor.run(-motorSpeed);
+  rightMotor.run(motorSpeed);
 }
 void turnRight() 
 {
-  // Code for turning right 90 deg
+  rightMotor.run(255);
+  leftMotor.run(-255);
+  delay(NINETYDEG);
+  moveForward();
 }
 void turnLeft() 
-{// Code for turning left 90 deg
+{
+  leftMotor.run(255);
+  rightMotor.run(-255);
+  delay(NINETYDEG);
+  moveForward();
 }
 void uTurn() 
 {
-  // Code for u-turn
+  leftMotor.run(255);
+  rightMotor.run(-255);
+  delay(2 * NINETYDEG);
+  moveForward();
 }
 void doubleLeftTurn() 
-{// Code for double left turn
+{
+  turnLeft();
+  moveForward();
+  delay(1000);
+  turnLeft();
+  moveForward();
 }
 void doubleRightTurn() 
 {
-  // Code for double right turn
+  turnRight();
+  moveForward();
+  delay(1000); //adjust time needed to go straight
+  turnRight();
+  moveForward();
 }
 void nudgeLeft() 
 {
   // Code for nudging slightly to the left for some short interval
-  stopMotor();
   rightMotor.run(motorSpeed);
   delay(50);
+  stopMotor();
 }
 void nudgeRight() 
 {// Code for nudging slightly to the right for some short interval
-  stopMotor();
   leftMotor.run(-motorSpeed);
   delay(50);
+  stopMotor();
 }
 
 void decoder(int mode)
 { //0 for IR, 1 for Red, 2 for Green, 3 for Blue
-  if (mode == 0) {
+  if (mode == 0)
+  {
     digitalWrite(S1, LOW);
     digitalWrite(S2, LOW);
-  } else if (mode == 1) {
+  }
+  else if (mode == 1)
+  {
     digitalWrite(S1, HIGH);
     digitalWrite(S2, HIGH);
-  } else if (mode == 2) {
+  }
+  else if (mode == 2)
+  {
     digitalWrite(S1, HIGH);
     digitalWrite(S2, LOW);
-  } else {
+  }
+  else
+  {
     digitalWrite(S1, LOW);
     digitalWrite(S2, HIGH);
   }
 }
 
-
 int detectColour()
 {
 // Shine each colour, read LDR after some delay
-  int readColour[3];
+  float readColour[3];
   for(int i = 0; i < 3; i++)
   {
     decoder(i+1);
     delay(COLOURSENSORCOOLDOWN);
-    readcolour[i] = analogRead(LDR);
+    readColour[i] = analogRead(LDR);
   }
 // Run algorithm for colour decoding
-  int smallestError = 2147483647, colour = 0;
+  float smallestError = 1470000, colour = 2;
   for(int i = 0; i < 6; i++)
   {
-    int sumSquareError = 0;
+    float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
-      sumSquareError += (readColour[j] - coloursArray[i][j]) * (readColour[j] - coloursArray[i][j]);
+      float error = readColour[j] - coloursArray[i][j];
+      sumSquareError += error * error;
     }
     if (sumSquareError < smallestError)
     {
@@ -111,12 +140,16 @@ int detectColour()
 void setup()
 {
 // Configure pinMode for A0, A1, A2, A3
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  
   Serial.begin(9600);
 }
+
+
+
 void loop()
 {
-  
-
 // Read ultrasonic sensing distance (choose an appropriate timeout)
   pinMode(ULTRASONIC, OUTPUT);
   digitalWrite(ULTRASONIC, LOW);
@@ -127,7 +160,6 @@ void loop()
   pinMode(ULTRASONIC, INPUT);
   long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
   int dist_cm = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
-  Serial.println(closeToLeft);
   if (dist_cm < 6 && dist_cm != 0) 
   {
     closeToLeft++;
@@ -135,39 +167,23 @@ void loop()
 
 // Read IR sensing distance (turn off IR, read IR detector, turn on IR, read IR detector, estimate distance)
   decoder(1);
-  int IRBaseline = analogread(LIGHTSENSOR);
+  int IRBaseline = analogRead(LIGHTSENSOR);
   decoder(0);
-  if(analogRead(LIGHTSENSOR) - IRBaseLine > 100)
+  delay(IRSENSORCOOLDOWN);
+  if(IRBaseline - analogRead(LIGHTSENSOR)> 230)
   {
     closeToRight++;
   }
 
 // if within black line, stop motor, detect colour, and take corresponding action
-
-  
-// else if too near to left wall, nudge right
-  if(closeToLeft >= 8)
-  {
-    closeToLeft = 0;
-    Serial.println("nudge right");
-    nudgeRight();
-  }
-// else if too near to right wall, nudge left
-  else if(closeToRight >= 8)
-  {
-    closeToRight = 0;
-    nudgeLeft();
-  }
-
-
-  else if(lineFinder.readSensors() == S1_IN_S2_IN)
+  if(lineFinder.readSensors() == S1_IN_S2_IN)
   {
     stopMotor();
     int colour = detectColour();
     int red = 0, green = 1, blue = 2, orange = 3, purple = 4;
     if (colour == red)
     {
-      leftTurn() ;
+      turnLeft();
     }
     else if (colour == green)
     {
@@ -187,16 +203,30 @@ void loop()
     }
     else 
     {
-      celebrate() ;
-      delay( 10000 ) ;
+      stopMotor();
+      celebrate();
+      delay( 10000 );
     }
   }
+  
+// else if too near to left wall, nudge right
+  else if(closeToLeft >= 8)
+  {
+    closeToLeft = 0;
+    nudgeRight();
+  }
+
+// else if too near to right wall, nudge left
+  else if(closeToRight >= 8)
+  {
+    closeToRight = 0;
+    nudgeLeft();
+  }
+
 // else move forward
   else
   {
-    //go forward
-    leftMotor.run(-motorSpeed);
-    rightMotor.run(motorSpeed);
+    moveForward();
   }
   
 }
