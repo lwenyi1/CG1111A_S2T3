@@ -7,7 +7,7 @@
 
 #define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
 #define SPEED_OF_SOUND 340 // Update according to your own experiment
-#define COLOURSENSORCOOLDOWN 50
+#define COLOURSENSORCOOLDOWN 500
 #define IRSENSORCOOLDOWN 10
 #define NINETYDEG 230
 
@@ -18,7 +18,16 @@ uint8_t motorSpeed = 255;
 
 int closeToLeft = 0;
 int closeToRight = 0;
-float coloursArray[6][3] = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}};
+float coloursArray[6][3] = {{231.00,219.60,257.80}, {64.00,265.60,223.80}, {88.80,352.80,442.00}, {257.40,328.80,317.20}, {102.00,244.40,354.40}, {293.40,495.80,523.00}};
+/*
+Red: (Red:231.00 Green:219.60 Blue:257.80 ) 
+Green: (Red:64.00 Green:265.60 Blue:223.80 ) 
+Blue: (Red:88.80 Green:352.80 Blue:442.00 ) 
+Orange: (Red:257.40 Green:328.80 Blue:317.20 ) 
+Purple: (Red:102.00 Green:244.40 Blue:354.40 ) 
+White: (Red:293.40 Green:495.80 Blue:523.00 )
+*/
+
 
 void celebrate() 
 {// Code for playing celebratory tune
@@ -33,16 +42,16 @@ void moveForward()
   leftMotor.run(-motorSpeed);
   rightMotor.run(motorSpeed);
 }
-void turnRight() 
+void turnLeft() 
 {
   rightMotor.run(255);
-  leftMotor.run(-255);
+  leftMotor.run(255);
   delay(NINETYDEG);
   moveForward();
 }
-void turnLeft() 
+void turnRight() 
 {
-  leftMotor.run(255);
+  leftMotor.run(-255);
   rightMotor.run(-255);
   delay(NINETYDEG);
   moveForward();
@@ -50,7 +59,7 @@ void turnLeft()
 void uTurn() 
 {
   leftMotor.run(255);
-  rightMotor.run(-255);
+  rightMotor.run(255);
   delay(2 * NINETYDEG);
   moveForward();
 }
@@ -75,13 +84,11 @@ void nudgeLeft()
   // Code for nudging slightly to the left for some short interval
   rightMotor.run(motorSpeed);
   delay(50);
-  stopMotor();
 }
 void nudgeRight() 
 {// Code for nudging slightly to the right for some short interval
   leftMotor.run(-motorSpeed);
   delay(50);
-  stopMotor();
 }
 
 void decoder(int mode)
@@ -160,7 +167,7 @@ void loop()
   pinMode(ULTRASONIC, INPUT);
   long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
   int dist_cm = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
-  if (dist_cm < 6 && dist_cm != 0) 
+  if (dist_cm < 8 && dist_cm != 0) 
   {
     closeToLeft++;
   } 
@@ -203,21 +210,19 @@ void loop()
     }
     else 
     {
-      stopMotor();
       celebrate();
-      delay( 10000 );
     }
   }
   
 // else if too near to left wall, nudge right
-  else if(closeToLeft >= 8)
+  else if(closeToLeft >= 5)
   {
     closeToLeft = 0;
     nudgeRight();
   }
 
 // else if too near to right wall, nudge left
-  else if(closeToRight >= 8)
+  else if(closeToRight >= 5)
   {
     closeToRight = 0;
     nudgeLeft();
