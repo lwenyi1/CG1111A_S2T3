@@ -100,7 +100,7 @@ int detectColour()
     readColour[i] = analogRead(LDR);
   }
   float smallestError = 1470000;
-  int colour;
+  int colour = 5;
   for(int i = 0; i < 6; i++)
   {
     float sumSquareError = 0;
