@@ -10,6 +10,13 @@ MeLineFollower lineFinder(PORT_2);
 MeDCMotor leftMotor(M1);
 MeDCMotor rightMotor(M2);
 
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+#define ORANGE 3
+#define PURPLE 4
+#define WHITE 5
+
 #define TIMEOUT 5000 
 #define SPEED_OF_SOUND 340 
 #define SAFEDISTANCE 9
@@ -181,17 +188,17 @@ void loop() {
   {
     stopMotor();
     int red = 0, green = 1, blue = 2, orange = 3, purple = 4, colour = detectColour();
-    if (colour == red) turn_left();
-    else if (colour == green) turn_right();
-    else if (colour == orange) turn_around();
-    else if (colour == purple)
+    if (colour == RED) turn_left();
+    else if (colour == GREEN) turn_right();
+    else if (colour == ORANGE) turn_around();
+    else if (colour == PURPLE)
     {
       turn_left();
       moveForward();
       delay(CONSEC_TURN_WAIT_TIME);
       turn_left();
     }
-    else if(colour == blue)
+    else if(colour == BLUE)
     {
       turn_right();
       moveForward();
