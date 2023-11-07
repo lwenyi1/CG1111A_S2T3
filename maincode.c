@@ -187,7 +187,7 @@ void loop() {
   if (lineFinder.readSensors() == S1_IN_S2_IN) 
   {
     stopMotor();
-    int red = 0, green = 1, blue = 2, orange = 3, purple = 4, colour = detectColour();
+    int colour = detectColour();
     if (colour == RED) turn_left();
     else if (colour == GREEN) turn_right();
     else if (colour == ORANGE) turn_around();
