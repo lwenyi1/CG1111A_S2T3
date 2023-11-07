@@ -6,9 +6,9 @@
 #define S2 A1
 #define ULTRASONIC 12
 MeBuzzer buzzer;
-MeLineFollower lineFinder(PORT_2); // assigning lineFinder to RJ25 port 2
-MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
-MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
+MeLineFollower lineFinder(PORT_2);
+MeDCMotor leftMotor(M1);
+MeDCMotor rightMotor(M2);
 
 #define TIMEOUT 5000 
 #define SPEED_OF_SOUND 340 
