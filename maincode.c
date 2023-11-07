@@ -4,14 +4,15 @@
 #define IR_SENSOR A3
 #define S1 A0
 #define S2 A1
+#define ULTRASONIC 12
 
 #define TIMEOUT 5000 
 #define SPEED_OF_SOUND 340 
-#define ULTRASONIC 12
 #define SAFEDISTANCE 9
 #define COLOURSENSORCOOLDOWN 500
 #define NINETYDEG 640
 #define IRCUTOFF 300
+#define CONSEC_TURN_WAIT_TIME 850
 
 MeBuzzer buzzer;
 MeLineFollower lineFinder(PORT_2); // assigning lineFinder to RJ25 port 2
@@ -23,13 +24,11 @@ uint8_t turningSpeed = 170;
 
 float coloursArray[6][3] = {{241.20, 449.00, 224.60}, {126.10, 540.00, 229.50}, {150.90, 603.20, 417.70}, {255.80, 533.60, 255.60}, {162.10, 528.40, 347.00}, {272.20, 685.10, 472.30}};
 char colourStr[6][7] = {"Red", "Green", "Blue", "Orange", "Purple", "White"};
-int notes[] = {784, 0, 784, 0, 880, 0, 1046, 0, 988, 1175, 1319, 0, 1046};
-int rhythm[] = {19, 1, 18, 2, 18, 2, 20, 2, 18, 10, 18, 5, 70};
 
 void celebrate() {
-  // Each of the following "function calls" plays a single tone.
-  // The numbers in the bracket specify the frequency and the duration (ms)
-  for (int i = 0; i < 13; i++) {
+  int notes[] = {784, 0, 784, 0, 880, 0, 1046, 0, 988, 0, 1175, 1319, 0, 1046};
+  int rhythm[] = {18, 2, 18, 2, 10, 10, 10, 10, 10, 10, 10, 10, 10, 60};
+  for (int i = 0; i < 14; i++) {
     if(notes[i] == 0)
     {
       buzzer.noTone();
@@ -179,14 +178,14 @@ void loop() {
     {
       turn_left();
       moveForward();
-      delay(850);
+      delay(CONSEC_TURN_WAIT_TIME);
       turn_left();
     }
     else if(colour == blue)
     {
       turn_right();
       moveForward();
-      delay(850);
+      delay(CONSEC_TURN_WAIT_TIME);
       turn_right();
     }
     else
