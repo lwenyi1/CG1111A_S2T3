@@ -83,20 +83,20 @@ void getColourReadings(int scansPerColour){
   }
 
   Serial.println("All colours scanned.");
+  Serial.print("{");
   for(int i = 0; i < 6; i++)
   {
-    Serial.print(colourStr[i]);
-    Serial.print(": (");
+    Serial.print("{");
     for(int k = 0; k < 3; k++)
     {
-      Serial.print(colourStr[k]);
-      Serial.print(":");
       Serial.print(coloursArray[i][k]);
-      Serial.print(" ");
+      if(k != 2) Serial.print(", ");
     }
-    Serial.print(")");
-    Serial.println(" ");
+    if(i != 5) Serial.print("}, ");
+   
   }
+  Serial.print("}};");
+  Serial.println(" ");
   delay(10000);
 }
 
@@ -122,7 +122,7 @@ void setup(){
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   Serial.begin(9600);
-  getColourReadings(5);
+  getColourReadings(10);
 }
 
 void loop(){
