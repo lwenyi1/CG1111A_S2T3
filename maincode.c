@@ -91,8 +91,7 @@ bool read_IR_sensor()
 }
 
 int detectColour()
-{
-// Shine each colour, read LDR after some delay
+{// Shine each colour, read LDR after some delay
   float readColour[3];
   for(int i = 0; i < 3; i++)
   {
@@ -107,7 +106,8 @@ int detectColour()
     float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
-      sumSquareError += (readColour[j] - coloursArray[i][j]) * (readColour[j] - coloursArray[i][j]);
+      float error = readColour[j] - coloursArray[i][j];
+      sumSquareError += error * error;
     }
     if (sumSquareError < smallestError)
     {
