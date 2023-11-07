@@ -17,7 +17,8 @@ MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
 #define NINETYDEG 640
 #define IRCUTOFF 300
 #define CONSEC_TURN_WAIT_TIME 850
-const uint8_t motorSpeed = 255;// Setting motor speed to an integer between 1 and 255
+#define NUDGETIME 2
+const uint8_t motorSpeed = 255;
 const uint8_t turningSpeed = 170;
 
 //calibrated colour values
@@ -129,35 +130,41 @@ void moveForward()
   rightMotor.run(motorSpeed);
 }
 
-void turn_left(){
+void turn_left()
+{
   leftMotor.run(turningSpeed);
   rightMotor.run(turningSpeed);
   delay(NINETYDEG);
 }
 
-void turn_right() {
+void turn_right()
+{
   leftMotor.run(-turningSpeed);
   rightMotor.run(-turningSpeed);
   delay(NINETYDEG);
 }
 
-void turn_around() {
+void turn_around()
+{
   leftMotor.run(-turningSpeed);
   rightMotor.run(-turningSpeed);
   delay(NINETYDEG * 2);
 }
 
-void nudge_left() {
+void nudge_left()
+{
   leftMotor.run(0);
   rightMotor.run(motorSpeed);
-  delay(2);
+  delay(NUDGETIME);
 }
 
-void nudge_right() {
+void nudge_right()
+{
   leftMotor.run(-motorSpeed);
   rightMotor.run(0);
-  delay(2);
+  delay(NUDGETIME);
 }
+
 
 void setup() 
 {
