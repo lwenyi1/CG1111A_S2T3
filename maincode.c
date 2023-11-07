@@ -1,118 +1,83 @@
-#include <MeMCore.h>
-#define LIGHTSENSOR A3
-#define ULTRASONIC 12
+#include "MeMCore.h"
+
 #define LDR A2
+#define IR_SENSOR A3
 #define S1 A0
 #define S2 A1
 
-#define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
-#define SPEED_OF_SOUND 340 // Update according to your own experiment
+#define TIMEOUT 5000 
+#define SPEED_OF_SOUND 340 
+#define ULTRASONIC 12
+#define SAFEDISTANCE 10
 #define COLOURSENSORCOOLDOWN 500
-#define IRSENSORCOOLDOWN 10
-#define NINETYDEG 210
+#define NINETYDEG 640
+#define IRCUTOFF 300
+
+MeBuzzer buzzer;
+MeLineFollower lineFinder(PORT_2); // assigning lineFinder to RJ25 port 2
 
 MeDCMotor leftMotor(M1); // assigning leftMotor to port M1
 MeDCMotor rightMotor(M2); // assigning RightMotor to port M2
-MeLineFollower lineFinder(PORT_2); // assigning lineFinder to RJ25 port 2
-uint8_t motorSpeed = 255;
+uint8_t motorSpeed = 255;// Setting motor speed to an integer between 1 and 255
+uint8_t turningSpeed = 170;
 
-int closeToLeft = 0;
-int closeToRight = 0;
-float coloursArray[6][3] = {{231.00,219.60,257.80}, {64.00,265.60,223.80}, {88.80,352.80,442.00}, {257.40,328.80,317.20}, {102.00,244.40,354.40}, {293.40,495.80,523.00}};
-/*
-Red: (Red:231.00 Green:219.60 Blue:257.80 ) 
-Green: (Red:64.00 Green:265.60 Blue:223.80 ) 
-Blue: (Red:88.80 Green:352.80 Blue:442.00 ) 
-Orange: (Red:257.40 Green:328.80 Blue:317.20 ) 
-Purple: (Red:102.00 Green:244.40 Blue:354.40 ) 
-White: (Red:293.40 Green:495.80 Blue:523.00 )
-*/
-
+float coloursArray[6][3] = {{241.20, 449.00, 224.60}, {126.10, 540.00, 229.50}, {150.90, 603.20, 417.70}, {255.80, 533.60, 255.60}, {162.10, 528.40, 347.00}, {272.20, 685.10, 472.30}};
+char colourStr[6][7] = {"Red", "Green", "Blue", "Orange", "Purple", "White"};
 
 void celebrate() 
 {// Code for playing celebratory tune
-}
-void stopMotor()
-{
-  leftMotor.stop(); // Stop left motor
-  rightMotor.stop(); // Stop right motor
-}
-void moveForward() 
-{
-  leftMotor.run(-motorSpeed);
-  rightMotor.run(motorSpeed);
-}
-void turnLeft() 
-{
-  rightMotor.run(255);
-  leftMotor.run(255);
-  delay(NINETYDEG);
-  moveForward();
-}
-void turnRight() 
-{
-  leftMotor.run(-255);
-  rightMotor.run(-255);
-  delay(NINETYDEG);
-  moveForward();
-}
-void uTurn() 
-{
-  leftMotor.run(255);
-  rightMotor.run(255);
-  delay(2 * NINETYDEG);
-  moveForward();
-}
-void doubleLeftTurn() 
-{
-  turnLeft();
-  moveForward();
-  delay(1000);
-  turnLeft();
-  moveForward();
-}
-void doubleRightTurn() 
-{
-  turnRight();
-  moveForward();
-  delay(1000); //adjust time needed to go straight
-  turnRight();
-  moveForward();
-}
-void nudgeLeft() 
-{
-  // Code for nudging slightly to the left for some short interval
-  rightMotor.run(motorSpeed);
-  delay(50);
-}
-void nudgeRight() 
-{// Code for nudging slightly to the right for some short interval
-  leftMotor.run(-motorSpeed);
-  delay(50);
+  buzzer.tone(392, 200);
+  buzzer.tone(523, 200);
+  buzzer.tone(659, 200);
+  buzzer.tone(784, 200);
+  buzzer.tone(659, 150);
+  buzzer.tone(784, 400);
+  buzzer.noTone();
 }
 
 void decoder(int mode)
 { //0 for IR, 1 for Red, 2 for Green, 3 for Blue
-  if (mode == 0)
-  {
+  if (mode == 0) {
     digitalWrite(S1, LOW);
     digitalWrite(S2, LOW);
   }
-  else if (mode == 1)
-  {
+  else if (mode == 1) {
     digitalWrite(S1, HIGH);
     digitalWrite(S2, HIGH);
-  }
-  else if (mode == 2)
-  {
+  } else if (mode == 2) {
     digitalWrite(S1, HIGH);
     digitalWrite(S2, LOW);
-  }
-  else
-  {
+  } else {
     digitalWrite(S1, LOW);
     digitalWrite(S2, HIGH);
   }
+}
+
+double read_ultrasonic() {
+  pinMode(ULTRASONIC, OUTPUT);
+  digitalWrite(ULTRASONIC, LOW);
+  delayMicroseconds(2);
+  
+  digitalWrite(ULTRASONIC, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC, LOW);
+  pinMode(ULTRASONIC, INPUT);
+  long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
+  double distance = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
+  return distance;
+}
+
+bool read_IR_sensor() {
+  long baseline = analogRead(IR_SENSOR);
+  decoder(0);
+  delay(10);
+  long feedback = analogRead(IR_SENSOR);
+  if (baseline - feedback > IRCUTOFF) {
+    decoder(3);
+    return true;
+  }
+  decoder(3);
+  return false;
 }
 
 int detectColour()
@@ -125,8 +90,8 @@ int detectColour()
     delay(COLOURSENSORCOOLDOWN);
     readColour[i] = analogRead(LDR);
   }
-// Run algorithm for colour decoding
-  float smallestError = 1470000, colour = 2;
+  float smallestError = 1470000;
+  int colour;
   for(int i = 0; i < 6; i++)
   {
     float sumSquareError = 0;
@@ -143,94 +108,90 @@ int detectColour()
   return colour;
 }
 
-void setup()
+void stopMotor()
 {
-// Configure pinMode for A0, A1, A2, A3
-  pinMode(S1, OUTPUT);
-  pinMode(S2, OUTPUT);
-  
-  Serial.begin(9600);
+  leftMotor.stop(); // Stop left motor
+  rightMotor.stop(); // Stop right motor
 }
 
-
-
-void loop()
+void moveForward() 
 {
-// Read ultrasonic sensing distance (choose an appropriate timeout)
-  pinMode(ULTRASONIC, OUTPUT);
-  digitalWrite(ULTRASONIC, LOW);
-  delayMicroseconds(2);
-  digitalWrite(ULTRASONIC, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(ULTRASONIC, LOW);
-  pinMode(ULTRASONIC, INPUT);
-  long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
-  int dist_cm = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
-  if (dist_cm < 8 && dist_cm != 0) 
-  {
-    closeToLeft++;
-  } 
+  leftMotor.run(-motorSpeed);
+  rightMotor.run(motorSpeed);
+}
 
-// Read IR sensing distance (turn off IR, read IR detector, turn on IR, read IR detector, estimate distance)
-  decoder(1);
-  int IRBaseline = analogRead(LIGHTSENSOR);
-  decoder(0);
-  delay(IRSENSORCOOLDOWN);
-  if(IRBaseline - analogRead(LIGHTSENSOR)> 230)
-  {
-    closeToRight++;
-  }
+void turn_left(){
+  leftMotor.run(turningSpeed);
+  rightMotor.run(turningSpeed);
+  delay(NINETYDEG);
+}
 
-// if within black line, stop motor, detect colour, and take corresponding action
-  if(lineFinder.readSensors() == S1_IN_S2_IN)
+void turn_right() {
+  leftMotor.run(-turningSpeed);
+  rightMotor.run(-turningSpeed);
+  delay(NINETYDEG);
+}
+
+void turn_around() {
+  leftMotor.run(-turningSpeed);
+  rightMotor.run(-turningSpeed);
+  delay(NINETYDEG * 2);
+}
+
+void nudge_left() {
+  leftMotor.run(0);
+  rightMotor.run(motorSpeed);
+  delay(2);
+}
+
+void nudge_right() {
+  leftMotor.run(-motorSpeed);
+  rightMotor.run(0);
+  delay(2);
+}
+
+void setup() 
+{
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  decoder(2);
+  delay(3000);
+  decoder(3);
+}
+
+void loop() {
+  double distance = read_ultrasonic();//read the distance from ultranosic sensor
+  bool IR_bool = read_IR_sensor();
+  int sensorState = lineFinder.readSensors(); // read the line sensor's state
+  if (sensorState == S1_IN_S2_IN) 
   {
     stopMotor();
-    int colour = detectColour();
-    int red = 0, green = 1, blue = 2, orange = 3, purple = 4;
-    if (colour == red)
-    {
-      turnLeft();
-    }
-    else if (colour == green)
-    {
-      turnRight() ;
-    }
-    else if (colour == blue)
-    {
-      doubleRightTurn() ;
-    }
-    else if (colour == orange)
-    {
-      uTurn() ;
-    }
+    int red = 0, green = 1, blue = 2, orange = 3, purple = 4, white = 5, colour = detectColour();
+    if (colour == red) turn_left();
+    else if (colour == green) turn_right();
+    else if (colour == orange) turn_around();
     else if (colour == purple)
     {
-      doubleLeftTurn() ;
+      turn_left();
+      moveForward();
+      delay(900);
+      turn_left();
     }
-    else 
+    else if(colour == blue)
     {
+      turn_right();
+      moveForward();
+      delay(900);
+      turn_right();
+    }
+    else
+    {
+      stopMotor();
       celebrate();
+      delay(5000);
     }
   }
-  
-// else if too near to left wall, nudge right
-  else if(closeToLeft >= 5)
-  {
-    closeToLeft = 0;
-    nudgeRight();
-  }
-
-// else if too near to right wall, nudge left
-  else if(closeToRight >= 5)
-  {
-    closeToRight = 0;
-    nudgeLeft();
-  }
-
-// else move forward
-  else
-  {
-    moveForward();
-  }
-  
+  else if (distance < SAFEDISTANCE && distance > 0) nudge_right();
+  else if (IR_bool) nudge_left();
+  else moveForward();
 }
