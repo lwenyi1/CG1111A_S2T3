@@ -176,10 +176,8 @@ void setup()
 }
 
 void loop() {
-  double distance = read_ultrasonic();//read the distance from ultranosic sensor
-  bool IR_bool = read_IR_sensor();
-  int sensorState = lineFinder.readSensors(); // read the line sensor's state
-  if (sensorState == S1_IN_S2_IN) 
+  double distance = read_ultrasonic(); //read the distance from ultranosic sensor
+  if (lineFinder.readSensors() == S1_IN_S2_IN) 
   {
     stopMotor();
     int red = 0, green = 1, blue = 2, orange = 3, purple = 4, white = 5, colour = detectColour();
@@ -208,6 +206,6 @@ void loop() {
     }
   }
   else if (distance < SAFEDISTANCE && distance > 0) nudge_right();
-  else if (IR_bool) nudge_left();
+  else if (read_IR_sensor()) nudge_left();
   else moveForward();
 }
