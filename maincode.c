@@ -182,7 +182,8 @@ void setup()
   decoder(3);
 }
 
-void loop() {
+void loop()
+{
   double distance = read_ultrasonic(); //read the distance from ultranosic sensor
   if (lineFinder.readSensors() == S1_IN_S2_IN) 
   {
