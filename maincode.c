@@ -31,12 +31,12 @@ MeDCMotor rightMotor(M2);
 #define SPEED_OF_SOUND 340 
 #define SAFEDISTANCE 9
 #define COLOURSENSORCOOLDOWN 500
-#define NINETYDEG 640
+#define NINETYDEG 360
 #define IRCUTOFF 300
 #define CONSEC_TURN_WAIT_TIME 850
 #define NUDGETIME 2
 const uint8_t motorSpeed = 255;
-const uint8_t turningSpeed = 170;
+const uint8_t turningSpeed = 255;
 
 //calibrated colour values
 float coloursArray[8][3] = 
@@ -109,7 +109,7 @@ void decoder(int mode) {
  * @return Returns TRUE if distance measured is less than min. distance (too close)
  *         and FALSE if more than (not too close).
  */
-double read_ultrasonic()
+bool read_ultrasonic()
 {
   pinMode(ULTRASONIC, OUTPUT);
   digitalWrite(ULTRASONIC, LOW);
@@ -120,7 +120,7 @@ double read_ultrasonic()
   pinMode(ULTRASONIC, INPUT);
   long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
   double distance = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
-  return distance;
+  return distance < SAFEDISTANCE && distance > 0;
 }
 
 /**
@@ -176,8 +176,8 @@ int detectColour()
     float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
-      float error = readColour[j] - coloursArray[i][j];
-      sumSquareError += error * error;
+      float normalisedError = (readColour[j] - coloursArray[i][j]) / (coloursArray[7][j] - coloursArray[6][j]);
+      sumSquareError += normalisedError * normalisedError;
     }
     if (sumSquareError < smallestError)
     {
@@ -247,7 +247,6 @@ void setup()
 
 void loop()
 {
-  double distance = read_ultrasonic(); //read distance from ultranosic sensor
   if (lineFinder.readSensors() == S1_IN_S2_IN) 
   {
     stopMotor();
@@ -277,7 +276,7 @@ void loop()
       delay(5000);
     }
   }
-  else if (distance < SAFEDISTANCE && distance > 0) nudge_right();
+  else if (read_ultrasonic()) nudge_right();
   else if (read_IR_sensor()) nudge_left();
   else moveForward();
 }
