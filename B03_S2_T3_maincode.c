@@ -98,13 +98,15 @@ void decoder(int mode) {
 
 /**
  * Sends out and takes in a pulse from the ultrasonic sensor and measures the 
- * timing between, then converts it to distance measured. Return value determines
- * whether the robot is nudged or not.
+ * timing between, then converts it to distance measured. The distance measured
+ * is used to check if the robot is too close or not, represented as a bool type.
+ * Return value determines whether the robot is nudged or not.
  *
  * @param[in] TIMEOUT Definition for pulseIn time limit.
  * @param[in,out] ULTRASONIC Ultrasonic Sensor's pin, written to HIGH or LOW 
  *                           in OUTPUT mode. Reads in pulse when in INPUT mode.
- * @return Returns the calculated distance in cm.
+ * @return Returns TRUE if distance measured is less than min. distance (too close)
+ *         and FALSE if more than (not too close).
  */
 double read_ultrasonic()
 {
