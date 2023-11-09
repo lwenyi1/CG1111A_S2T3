@@ -26,7 +26,7 @@ MeDCMotor rightMotor(M2);
 #define PURPLE 4
 #define WHITE 5
 
-//define timings and speed
+//define timings, cutoff values and speed
 #define TIMEOUT 5000 
 #define SPEED_OF_SOUND 340 
 #define SAFEDISTANCE 9
@@ -98,7 +98,8 @@ void decoder(int mode) {
 
 /**
  * Sends out and takes in a pulse from the ultrasonic sensor and measures the 
- * timing between, then converts it to distance measured.
+ * timing between, then converts it to distance measured. Return value determines
+ * whether the robot is nudged or not.
  *
  * @param[in] TIMEOUT Definition for pulseIn time limit.
  * @param[in,out] ULTRASONIC Ultrasonic Sensor's pin, written to HIGH or LOW 
@@ -120,7 +121,15 @@ double read_ultrasonic()
 }
 
 /**
- * Reads in the voltage value
+ * Reads in the voltage value from the IR_SENSOR pin and determines if
+ * the robot is too close to the wall based on the measured value in
+ * comparison to the cutoff value. Accounts for baseline IR light from
+ * surroundings. Return value determines if the robot is nudged or not.
+ *
+ * @param[in] IR_SENSOR Pin taking in raw values from IR sensor's V_out.
+ * @param[in] IRCUTOFF Raw reading corresponding to minimum distance from wall.
+ * @return Returns TRUE if measured value is more than cut off (too close) and
+ *         false if it is less (not too close).
  */
 bool read_IR_sensor()
 {
