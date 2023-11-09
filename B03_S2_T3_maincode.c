@@ -18,7 +18,7 @@ MeLineFollower lineFinder(PORT_2);
 MeDCMotor leftMotor(M1);
 MeDCMotor rightMotor(M2);
 
-//define coloured paper IDs
+//define coloured paper ID list
 #define RED 0
 #define GREEN 1
 #define BLUE 2
@@ -143,6 +143,14 @@ bool read_IR_sensor()
   else return false;
 }
 
+/**
+ * <description of function>
+ *
+ * @param[in] <name> <description>
+ * @param[out] <name> <description>
+ * @return Returns an integer value corresponding to the paper's colour, 
+ * according to coloured paper ID list.
+ */
 int detectColour()
 {// Shine each colour, read LDR after some delay
   float readColour[3];
