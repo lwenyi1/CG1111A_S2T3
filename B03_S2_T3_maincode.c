@@ -149,7 +149,7 @@ bool read_IR_sensor()
  * @param[in] <name> <description>
  * @param[out] <name> <description>
  * @return Returns an integer value corresponding to the paper's colour, 
- * according to coloured paper ID list.
+ *         according to coloured paper ID list.
  */
 int detectColour()
 {// Shine each colour, read LDR after some delay
