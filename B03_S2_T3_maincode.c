@@ -1,7 +1,11 @@
 /**
- * A-maze-ing Race Mbot Arduino Code
- * 
  * @file B03_S2_T3_maincode.c
+ * @brief A-maze-ing Race Mbot Arduino Code
+ * @details This Arduino code determines how our Mbot behaves while going through the maze.
+ *          It contains functions for decoder output, Ultrasonic sensor readings, IR sensor
+ *          readings, Colour detection, steering and the celebration. It also has the Arduino
+ *          setup and loop functions.
+ *
  * @author B03_S2_T3
  */
 
@@ -45,45 +49,12 @@ float coloursArray[8][3] =
 {181.70, 494.70, 300.70}, {328.40, 694.80, 528.10}}; //min, max values for normalisation
 
 /**
- * Plays a celebratory tune using the Mbot buzzer. Runs through two arrays, one
- * containing frequencies for the notes and one containing timings for the
- * rhythm
- */
-void celebrate() 
-{
-  int notes[] = 
-  {392, 523, 659, 784, 1046, 1319, 1568, 1319, 0,
-  415, 523, 622, 831, 1046, 1245, 1661, 1245, 0, 
-  466, 587, 698, 932, 1175, 1397, 1865, 0,
-  1865, 0, 1865, 0, 1865, 0, 2093};
-
-  int rhythm[] =
-  {20, 20, 20, 20, 20, 20, 60, 40, 20,
-  20, 20, 20, 20, 20, 20, 60, 40, 20,
-  20, 20, 20, 20, 20, 20, 40, 20,
-  10, 10, 10, 10, 10, 10, 120};
-
-  for (int i = 0; i < 33; i++) 
-  {
-    if(notes[i] == 0)
-    {
-      buzzer.noTone();
-      delay(rhythm[i] * 8);
-    }
-    else buzzer.tone(notes[i], rhythm[i] * 8);
-  }
-  buzzer.noTone();
-}
-
-/**
- * Writes the pins connected to the 2-4 decoder to HIGH or LOW depending on
+ * Writes the output pins connected to the 2-4 decoder to HIGH or LOW depending on
  * the input.
  *
  * @param[in] mode An integer value corresponding to the desired decoder
  *                 output. 0 turns on the IR, 1 turns on the Red LED, 2 turns
  *                 on the Green LED, 3 turns on the Blue LED.
- * @param[out] S1 Pin for decoder's S1 input, set to HIGH or LOW.
- * @param[out] S2 Pin for decoder's S2 input, set to HIGH or LOW.
  */
 void decoder(int mode) {
   if (mode == 0)
@@ -114,9 +85,6 @@ void decoder(int mode) {
  * is used to check if the robot is too close or not, represented as a bool type.
  * Return value determines whether the robot is nudged or not.
  *
- * @param[in] TIMEOUT Definition for pulseIn time limit.
- * @param[in,out] ULTRASONIC Ultrasonic Sensor's pin, written to HIGH or LOW 
- *                           in OUTPUT mode. Reads in pulse when in INPUT mode.
  * @return Returns TRUE if distance measured is less than min. distance (too close)
  *         and FALSE if more than (not too close).
  */
@@ -140,8 +108,6 @@ bool read_ultrasonic()
  * comparison to the cutoff value. Accounts for baseline IR light from
  * surroundings. Return value determines if the robot is nudged or not.
  *
- * @param[in] IR_SENSOR Pin taking in raw values from IR sensor's V_out.
- * @param[in] IRCUTOFF Raw reading corresponding to minimum distance from wall.
  * @return Returns TRUE if measured value is more than cut off (too close) and
  *         false if it is less (not too close).
  */
@@ -165,9 +131,6 @@ bool read_IR_sensor()
  * and each colour, and returning the integer code of the colour that yields the
  * minimum sum of squared errors over the RGB values.
  *
- * @param[in] LDR Pin recieving raw values from colour detection circuit.
- * @param[in] coloursArray array of RGB values corresponding to the 6 colours of 
- *            paper, and the minimum and maximum RGB values.
  * @return Returns an integer value corresponding to the paper's colour, 
  *         according to coloured paper ID list.
  */
@@ -199,6 +162,10 @@ int detectColour()
   return colour;
 }
 
+/**
+ * The following steering functions determine the robots movement by varying
+ * inputs to the left and right motor functions provided by the Mbot library.
+ */
 void stopMotor()
 {
   leftMotor.stop();
@@ -246,6 +213,36 @@ void nudge_right()
   delay(NUDGETIME);
 }
 
+/**
+ * Plays a celebratory tune using the Mbot buzzer. Runs through two arrays, one
+ * containing frequencies for the notes and one containing timings for the
+ * rhythm
+ */
+void celebrate() 
+{
+  int notes[] = 
+  {392, 523, 659, 784, 1046, 1319, 1568, 1319, 0,
+  415, 523, 622, 831, 1046, 1245, 1661, 1245, 0, 
+  466, 587, 698, 932, 1175, 1397, 1865, 0,
+  1865, 0, 1865, 0, 1865, 0, 2093};
+
+  int rhythm[] =
+  {20, 20, 20, 20, 20, 20, 60, 40, 20,
+  20, 20, 20, 20, 20, 20, 60, 40, 20,
+  20, 20, 20, 20, 20, 20, 40, 20,
+  10, 10, 10, 10, 10, 10, 120};
+
+  for (int i = 0; i < 33; i++) 
+  {
+    if(notes[i] == 0)
+    {
+      buzzer.noTone();
+      delay(rhythm[i] * 8);
+    }
+    else buzzer.tone(notes[i], rhythm[i] * 8);
+  }
+  buzzer.noTone();
+}
 
 void setup() 
 {
@@ -266,14 +263,14 @@ void loop()
     if (colour == RED) turn_left();
     else if (colour == GREEN) turn_right();
     else if (colour == ORANGE) turn_around();
-    else if (colour == PURPLE)
+    else if (colour == PURPLE) //consecutive left turns
     {
       turn_left();
       moveForward();
       delay(CONSEC_TURN_WAIT_TIME);
       turn_left();
     }
-    else if(colour == BLUE)
+    else if(colour == BLUE) //consecutive right turns
     {
       turn_right();
       moveForward();
