@@ -1,12 +1,8 @@
 #include <MeMCore.h>
-#define LIGHTSENSOR A3
-#define ULTRASONIC 12
 #define LDR A2
 #define S1 A0
 #define S2 A1
 
-#define TIMEOUT 1000 // Max microseconds to wait; choose according to max distance of wall
-#define SPEED_OF_SOUND 340 // Update according to your own experiment
 #define COLOURSENSORCOOLDOWN 50 // timeout in ms for coloursensor
 
 float coloursArray[8][3] = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {10000,10000,10000}, {0,0,0}};
@@ -125,7 +121,7 @@ void setup(){
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   Serial.begin(9600);
-  getColourReadings(10);
+  getColourReadings(15);
 }
 
 void loop(){
