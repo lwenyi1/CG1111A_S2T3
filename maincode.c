@@ -85,7 +85,7 @@ void decoder(int mode)
   }
 }
 
-double read_ultrasonic()
+bool read_ultrasonic()
 {
   pinMode(ULTRASONIC, OUTPUT);
   digitalWrite(ULTRASONIC, LOW);
@@ -96,7 +96,7 @@ double read_ultrasonic()
   pinMode(ULTRASONIC, INPUT);
   long duration = pulseIn(ULTRASONIC, HIGH, TIMEOUT);
   double distance = duration / 2.0 / 1000000 * SPEED_OF_SOUND * 100;
-  return distance;
+  return distance < SAFEDISTANCE && distance > 0;
 }
 
 bool read_IR_sensor()
@@ -198,7 +198,6 @@ void setup()
 
 void loop()
 {
-  double distance = read_ultrasonic(); //read the distance from ultranosic sensor
   if (lineFinder.readSensors() == S1_IN_S2_IN) 
   {
     stopMotor();
@@ -227,7 +226,7 @@ void loop()
       delay(5000);
     }
   }
-  else if (distance < SAFEDISTANCE && distance > 0) nudge_right();
+  else if (read_ultrasonic()) nudge_right();
   else if (read_IR_sensor()) nudge_left();
   else moveForward();
 }
