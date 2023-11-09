@@ -21,12 +21,12 @@ MeDCMotor rightMotor(M2);
 #define SPEED_OF_SOUND 340 
 #define SAFEDISTANCE 9
 #define COLOURSENSORCOOLDOWN 50
-#define NINETYDEG 600
+#define NINETYDEG 360
 #define IRCUTOFF 290
-#define CONSEC_TURN_WAIT_TIME 850
+#define CONSEC_TURN_WAIT_TIME 880
 #define NUDGETIME 2
 const uint8_t motorSpeed = 255;
-const uint8_t turningSpeed = 170;
+const uint8_t turningSpeed = 255;
 
 //calibrated colour values
 float coloursArray[8][3] = 
