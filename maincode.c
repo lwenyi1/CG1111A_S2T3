@@ -20,16 +20,19 @@ MeDCMotor rightMotor(M2);
 #define TIMEOUT 5000 
 #define SPEED_OF_SOUND 340 
 #define SAFEDISTANCE 9
-#define COLOURSENSORCOOLDOWN 500
-#define NINETYDEG 640
-#define IRCUTOFF 300
+#define COLOURSENSORCOOLDOWN 50
+#define NINETYDEG 570
+#define IRCUTOFF 290
 #define CONSEC_TURN_WAIT_TIME 850
 #define NUDGETIME 2
 const uint8_t motorSpeed = 255;
 const uint8_t turningSpeed = 170;
 
 //calibrated colour values
-float coloursArray[6][3] = {{241.20, 449.00, 224.60}, {126.10, 540.00, 229.50}, {150.90, 603.20, 417.70}, {255.80, 533.60, 255.60}, {162.10, 528.40, 347.00}, {272.20, 685.10, 472.30}};
+float coloursArray[8][3] = 
+{{289.90, 494.70, 300.70}, {181.70, 571.60, 316.70}, {210.80, 628.70, 485.80}, //red, green, blue
+{296.80, 557.50, 323.20}, {216.00, 562.40, 414.80}, {328.40, 694.80, 528.10}, //orange, purple, white
+{181.70, 494.70, 300.70}, {328.40, 694.80, 528.10}}; //min, max values for normalisation
 
 void celebrate() 
 {
@@ -45,7 +48,7 @@ void celebrate()
   20, 20, 20, 20, 20, 20, 40, 20,
   10, 10, 10, 10, 10, 10, 120
   };
-  
+
   for (int i = 0; i < 33; i++)
   {
     if(notes[i] == 0)
@@ -124,8 +127,8 @@ int detectColour()
     float sumSquareError = 0;
     for(int j = 0; j < 3; j++)
     {
-      float error = readColour[j] - coloursArray[i][j];
-      sumSquareError += error * error;
+      float normalisedError = (readColour[j] - coloursArray[i][j]) / (coloursArray[7][j] - coloursArray[6][j]);
+      sumSquareError += normalisedError * normalisedError;
     }
     if (sumSquareError < smallestError)
     {
