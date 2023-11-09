@@ -12,11 +12,11 @@
 #include "MeMCore.h"
 
 //define pins and components
-#define LDR A2
-#define IR_SENSOR A3
-#define S1 A0
-#define S2 A1
-#define ULTRASONIC 12
+#define LDR A2 ///< Pin connected to V_out at LDR in colour detector circuit
+#define IR_SENSOR A3 ///< Pin connected to V_out in IR sensor circuit
+#define S1 A0 ///< Pin connected to decoder S1 pin
+#define S2 A1 ///< Pin connected to decoder S2 pin
+#define ULTRASONIC 12 ///< Pin connected to Ultrasonic sensor
 MeBuzzer buzzer;
 MeLineFollower lineFinder(PORT_2);
 MeDCMotor leftMotor(M1);
@@ -31,16 +31,16 @@ MeDCMotor rightMotor(M2);
 #define WHITE 5
 
 //define timings, cutoff values and speed
-#define TIMEOUT 5000 
-#define SPEED_OF_SOUND 340 
-#define SAFEDISTANCE 9
+#define TIMEOUT 5000 ///< Time limit for Ultrasonic sensor
+#define SPEED_OF_SOUND 340 ///< Speed of sound chosen for calcs is 340m/s
+#define SAFEDISTANCE 9 ///< Limit before robot considered too close to wall, in Ultrasonic sensor
 #define COLOURSENSORCOOLDOWN 50
-#define NINETYDEG 360
-#define IRCUTOFF 300
-#define CONSEC_TURN_WAIT_TIME 850
-#define NUDGETIME 2
-const uint8_t motorSpeed = 255;
-const uint8_t turningSpeed = 255;
+#define NINETYDEG 360 ///< Delay needed to turn 90 degrees
+#define IRCUTOFF 300 ///< Limit before robot considered too close to wall, in IR sensor
+#define CONSEC_TURN_WAIT_TIME 850 ///< Delay between consecutive turns
+#define NUDGETIME 2 ///< Delay determining amount robot is nudged
+const uint8_t motorSpeed = 255; ///< Determines speed going forward, max value of 255
+const uint8_t turningSpeed = 255; ///< Determines speed while turning, max value of 255
 
 //calibrated colour values
 float coloursArray[8][3] = 
@@ -53,8 +53,10 @@ float coloursArray[8][3] =
  * the input.
  *
  * @param[in] mode An integer value corresponding to the desired decoder
- *                 output. 0 turns on the IR, 1 turns on the Red LED, 2 turns
- *                 on the Green LED, 3 turns on the Blue LED.
+ *                 output. 0: turns on the IR. 1: turns on the Red LED. 2: turns
+ *                 on the Green LED. 3: turns on the Blue LED.
+ * @pre Caller must ensure that mode is a valid value from 0 to 3. Function will consider
+ *      any input value outside the range as 3 and turn on the Blue LED.
  */
 void decoder(int mode) {
   if (mode == 0)
