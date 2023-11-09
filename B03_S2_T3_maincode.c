@@ -39,9 +39,10 @@ const uint8_t motorSpeed = 255;
 const uint8_t turningSpeed = 170;
 
 //calibrated colour values
-float coloursArray[6][3] = {{241.20, 449.00, 224.60}, {126.10, 540.00, 229.50},
-                           {150.90, 603.20, 417.70}, {255.80, 533.60, 255.60}, 
-                           {162.10, 528.40, 347.00}, {272.20, 685.10, 472.30}};
+float coloursArray[8][3] = 
+{{289.90, 494.70, 300.70}, {181.70, 571.60, 316.70}, {210.80, 628.70, 485.80}, //red, green, blue
+{296.80, 557.50, 323.20}, {216.00, 562.40, 414.80}, {328.40, 694.80, 528.10}, //orange, purple, white
+{181.70, 494.70, 300.70}, {328.40, 694.80, 528.10}}; //min, max values for normalisation
 
 /**
  * Plays a celebratory tune using the Mbot buzzer. Runs through two arrays, one
@@ -146,10 +147,16 @@ bool read_IR_sensor()
 }
 
 /**
- * <description of function>
+ * Makes a single reading of RGB values from the LDR, and iterates over all colours
+ * in coloursArray, computing the difference between each RGB value of each colour
+ * and the RGB values of the reading, normalising the difference with coloursArray[6]
+ * and coloursArray[7], calculating the sum of squared error between the reading
+ * and each colour, and returning the integer code of the colour that yields the
+ * minimum sum of squared errors over the RGB values.
  *
- * @param[in] <name> <description>
- * @param[out] <name> <description>
+ * @param[in] LDR Pin recieving raw values from colour detection circuit.
+ * @param[in] coloursArray array of RGB values corresponding to the 6 colours of 
+ *            paper, and the minimum and maximum RGB values.
  * @return Returns an integer value corresponding to the paper's colour, 
  *         according to coloured paper ID list.
  */
