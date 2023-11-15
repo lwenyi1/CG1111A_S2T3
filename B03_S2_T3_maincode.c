@@ -58,7 +58,8 @@ float coloursArray[8][3] =
  * @pre Caller must ensure that mode is a valid value from 0 to 3. Function will consider
  *      any input value outside the range as 3 and turn on the Blue LED.
  */
-void decoder(int mode) {
+void decoder(int mode) 
+{
   if (mode == 0)
   {
     digitalWrite(S1, LOW);
